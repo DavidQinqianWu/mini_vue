@@ -1,17 +1,24 @@
+import { mutableHandler, readonlyHandler } from './baseHandler';
+function createActiveObject(raw: any, baseHandlers) {
+    return new Proxy(raw, baseHandlers);
+}
+
+export const enum ReactiveFlags {
+    IS_REACTIVE = '__v_isReactive',
+    IS_READONLY = '__v_isReadonly',
+}
+
 export function reactive(raw) {
-    return new Proxy(raw, {
-        get(target, key) {
-            const res = Reflect.get(target, key);
-            // TODO 依赖收集
+    return createActiveObject(raw, mutableHandler);
+}
+export function readonly(raw) {
+    return createActiveObject(raw, readonlyHandler);
+}
 
-            return res;
-        },
+export function isReactive(value) {
+    return !!value[ReactiveFlags.IS_REACTIVE];
+}
 
-        set(target, key, value) {
-            const res = Reflect.set(target, key, value);
-
-            // TODO: 触发依赖
-            return res;
-        },
-    });
+export function isReadOnly(value) {
+    return !!value[ReactiveFlags.IS_READONLY];
 }

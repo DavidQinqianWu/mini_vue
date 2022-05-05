@@ -1,20 +1,78 @@
+import { extend } from '../shared';
+
 class ReactiveEffect {
     private _fn: any;
-
+    deps = [];
+    active = true;
+    onStop?: () => void;
+    scheduler?: () => void;
     constructor(fn) {
         this._fn = fn;
     }
     run() {
+        activeEffect = this;
         return this._fn();
+    }
+
+    stop() {
+        if (this.active) {
+            cleanupEffect(this);
+            if (this.onStop) {
+                this.onStop();
+            }
+            this.active = false;
+        }
     }
 }
 
-export function effect(fn, options?) {
-    if (options) {
-        const schedular = options.schedular;
+function cleanupEffect(effect) {
+    effect.deps.forEach((dep: any) => {
+        dep.delete(effect);
+    });
+}
+
+const targetMap = new Map();
+export function track(target, key) {
+    let depsMap = targetMap.get(target);
+    if (!depsMap) {
+        depsMap = new Map();
+        targetMap.set(target, depsMap);
     }
 
+    let dep: Set<ReactiveEffect> = depsMap.get(key);
+    if (!dep) {
+        dep = new Set();
+        depsMap.set(key, dep);
+    }
+    if (!activeEffect) return;
+    dep.add(activeEffect);
+    activeEffect.deps.push(dep);
+}
+
+export function trigger(target, key) {
+    let depsMap = targetMap.get(target);
+    let dep = depsMap.get(key);
+
+    for (const effect of dep) {
+        if (effect.scheduler) {
+            effect.scheduler();
+        } else {
+            effect.run();
+        }
+    }
+}
+
+export function stop(runner) {
+    runner.effect.stop();
+}
+
+let activeEffect;
+export function effect(fn, options: any = {}) {
     const effect = new ReactiveEffect(fn);
+    extend(effect, options);
+
     effect.run();
-    return effect.run.bind(effect);
+    const runner: any = effect.run.bind(effect);
+    runner.effect = effect;
+    return runner;
 }
