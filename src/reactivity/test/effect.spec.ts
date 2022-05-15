@@ -62,7 +62,10 @@ describe('effect', () => {
         obj.prop = 2;
         expect(dummy).toBe(2);
         stop(runner);
-        obj.prop = 3;
+        // 这里会触发一个get 和 set 操作
+        // 1. 先触发get
+        // 2. 再触发set
+        obj.prop++;
         expect(dummy).toBe(2);
 
         runner();

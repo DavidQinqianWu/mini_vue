@@ -3,6 +3,7 @@ import { extend } from '../shared';
 class ReactiveEffect {
     private _fn: any;
     deps = [];
+    // 用来通过stop 来停止触发effect
     active = true;
     onStop?: () => void;
     scheduler?: () => void;
@@ -10,8 +11,19 @@ class ReactiveEffect {
         this._fn = fn;
     }
     run() {
+        // 1. 会收集依赖
+        // shouldTrack来区分
+        if (!this.active) {
+            return this._fn();
+        }
+
+        shouldTrack = true;
         activeEffect = this;
-        return this._fn();
+
+        const result = this._fn();
+        // reset
+        shouldTrack = false;
+        return result;
     }
 
     stop() {
@@ -29,10 +41,13 @@ function cleanupEffect(effect) {
     effect.deps.forEach((dep: any) => {
         dep.delete(effect);
     });
+    // 这里就可以清空了
+    effect.deps.length = 0;
 }
 
 const targetMap = new Map();
 export function track(target, key) {
+    if (!isTracking()) return;
     let depsMap = targetMap.get(target);
     if (!depsMap) {
         depsMap = new Map();
@@ -44,9 +59,13 @@ export function track(target, key) {
         dep = new Set();
         depsMap.set(key, dep);
     }
-    if (!activeEffect) return;
+    if (dep.has(activeEffect)) return;
     dep.add(activeEffect);
     activeEffect.deps.push(dep);
+}
+
+function isTracking() {
+    return shouldTrack && activeEffect !== undefined;
 }
 
 export function trigger(target, key) {
@@ -67,6 +86,7 @@ export function stop(runner) {
 }
 
 let activeEffect;
+let shouldTrack;
 export function effect(fn, options: any = {}) {
     const effect = new ReactiveEffect(fn);
     extend(effect, options);
