@@ -1,14 +1,15 @@
 import { extend } from '../shared';
 
-class ReactiveEffect {
+export class ReactiveEffect {
     private _fn: any;
     deps = [];
     // 用来通过stop 来停止触发effect
     active = true;
     onStop?: () => void;
     scheduler?: () => void;
-    constructor(fn) {
+    constructor(fn, scheduler_?) {
         this._fn = fn;
+        this.scheduler = scheduler_;
     }
     run() {
         // 1. 会收集依赖

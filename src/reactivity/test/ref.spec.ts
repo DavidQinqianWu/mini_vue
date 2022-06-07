@@ -52,7 +52,7 @@ describe('ref', () => {
     });
 
     // unRef 返回ref的value值
-    it('isRef', () => {
+    it('unRef', () => {
         const a = ref(1);
         const user = reactive({ age: 1 });
         expect(unRef(a)).toBe(1);
