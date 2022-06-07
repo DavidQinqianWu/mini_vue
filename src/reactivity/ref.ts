@@ -1,4 +1,4 @@
-import { isTracking, trackEffects, triggerEffects } from './effect';
+import { isTracking, trackEffects, triggerEffects, track } from './effect';
 import { hasChanged, isObject } from '../shared/index';
 import { reactive } from './reactive';
 
@@ -57,4 +57,25 @@ export function isRef(ref) {
 export function unRef(ref) {
     // 看看是不是一个ref对象, 如果是ref -> ref.value
     return isRef(ref) ? ref.value : ref;
+}
+
+export function proxyRefs(objectWithRefs) {
+    // 所以我们需要重写 objectWithRefs这个对象
+    // 1. 因为我们需要 new proxy(),  通过代理来写 get 方法
+    return new Proxy(objectWithRefs, {
+        get(target, key) {
+            // get -> age(ref)那么就给他返回.value
+            // not ref -> value
+            return unRef(Reflect.get(target, key));
+        },
+
+        set(target, key, value) {
+            // 如果该属性是 ref, 但是value不是
+            if (isRef(target[key]) && !isRef(value)) {
+                return (target[key].value = value);
+            } else {
+                return Reflect.set(target, key, value);
+            }
+        },
+    });
 }
