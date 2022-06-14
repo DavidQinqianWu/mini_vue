@@ -7,10 +7,12 @@ export function render(vnode, container) {
 
 function patch(vnode, container) {
     // 处理组件
-
+    // 1.判断我们额vnode是不是一个element/component
+    processElement();
     // 去处理我们的组件
     processComponent(vnode, container);
 }
+function processElement() {}
 
 function processComponent(vnode: any, container: any) {
     mountComponent(vnode, container);

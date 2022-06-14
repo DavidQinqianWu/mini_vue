@@ -32,8 +32,7 @@ function handleSetupResult(instance, setupResult: any) {
 
 function finishComponentSetup(instance: any) {
     const component = instance.type;
-
-    if (!component.render) {
+    if (component.render) {
         instance.render = component.render;
     }
 }
