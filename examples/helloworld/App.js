@@ -5,7 +5,18 @@ export const App = {
     // <template> </template>
     // render 必须写
     render() {
-        return h('div', 'hi, ' + this.msg);
+        return h(
+            'div',
+            {
+                id: 'root',
+                class: ['red', 'hard'],
+            },
+            // 'hi, mini-vue'
+            [
+                h('p', { class: 'red' }, 'hi'),
+                h('p', { class: 'blue' }, 'mini-vue'),
+            ]
+        );
     },
 
     setup() {
