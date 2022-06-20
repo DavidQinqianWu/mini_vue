@@ -12,17 +12,19 @@ export const App = {
                 class: ['red', 'hard'],
             },
             // 'hi, mini-vue'
-            [
-                h('p', { class: 'red' }, 'hi'),
-                h('p', { class: 'blue' }, 'mini-vue'),
-            ]
+            // [
+            //     h('p', { class: 'red' }, 'hi'),
+            //     h('p', { class: 'blue' }, 'mini-vue'),
+            // ]
+            // this.$el;
+            'hi,' + this.msg
         );
     },
 
     setup() {
         // composition api
         return {
-            msg: 'mini-vue',
+            msg: 'mini-vue, haha',
         };
     },
 };
