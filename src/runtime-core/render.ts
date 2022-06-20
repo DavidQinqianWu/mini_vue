@@ -23,7 +23,8 @@ function processElement(vnode, container) {
 }
 
 function mountElement(vnode: any, container) {
-    const el = document.createElement(vnode.type);
+    const el = (vnode.el = document.createElement(vnode.type));
+
     const { children } = vnode;
 
     if (typeof children === 'string') {
@@ -55,9 +56,9 @@ function mountComponent(vnode: any, container) {
     // 创建组件实例
     const instance = createComponentInstance(vnode);
     setupComponent(instance);
-    setupRenderEffect(instance, container);
+    setupRenderEffect(instance, container, vnode);
 }
-function setupRenderEffect(instance: any, container: any) {
+function setupRenderEffect(instance: any, container: any, vnode: any) {
     const { proxy } = instance;
 
     const subTree = instance.render.call(proxy);
@@ -65,4 +66,5 @@ function setupRenderEffect(instance: any, container: any) {
     // vnode -> patch
     // vnode -> element -> mountElement
     patch(subTree, container);
+    vnode.el = subTree.el;
 }
