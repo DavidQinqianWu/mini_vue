@@ -52,13 +52,13 @@ function processComponent(vnode: any, container: any) {
     mountComponent(vnode, container);
 }
 
-function mountComponent(vnode: any, container) {
+function mountComponent(initialVNode: any, container) {
     // 创建组件实例
-    const instance = createComponentInstance(vnode);
+    const instance = createComponentInstance(initialVNode);
     setupComponent(instance);
-    setupRenderEffect(instance, container, vnode);
+    setupRenderEffect(instance, container, initialVNode);
 }
-function setupRenderEffect(instance: any, container: any, vnode: any) {
+function setupRenderEffect(instance: any, container: any, initialVNode: any) {
     const { proxy } = instance;
 
     const subTree = instance.render.call(proxy);
@@ -66,5 +66,6 @@ function setupRenderEffect(instance: any, container: any, vnode: any) {
     // vnode -> patch
     // vnode -> element -> mountElement
     patch(subTree, container);
-    vnode.el = subTree.el;
+    // 子树的$el就是当前的VNode
+    initialVNode.el = subTree.el;
 }
